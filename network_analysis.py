@@ -113,6 +113,26 @@ class Network(object):
         """
         Uses a BIANA translation file to return a new Network object with the 
         desired type of IDs and format
+
+        @param:    translation_file
+        @pdef:     File containing the translations from biana codes to the translation id
+        @ptype:    String
+
+        @param:    translation_id
+        @pdef:     Type of ID in which the network will be translated
+        @ptype:    String
+
+        @param:    translation_format
+        @pdef:     Format of the final network
+        @ptype:    String
+
+        @param:    translated_network
+        @pdef:     File where the translated network will be written
+        @ptype:    String
+
+        @param:    translated_nodes
+        @pdef:     File where the nodes file will be written
+        @ptype:    String
         """
 
         if self.type_id != 'biana':
@@ -127,6 +147,22 @@ class Network(object):
         """
         Filter the network using only interactions where the proteins are 
         present in a Tissue object
+
+        @param:    filtered_network_file
+        @pdef:     File where the tissue-specific network will be written
+        @ptype:    String
+
+        @param:    filtered_nodes_file
+        @pdef:     File where the nodes file will be written
+        @ptype:    String
+
+        @param:    tissue_object
+        @pdef:     Tissue class object used to filter the network
+        @ptype:    Tissue class object
+
+        @param:    permission
+        @pdef:     Level of permission to create the network
+        @ptype:    Integer {0,1,2}
         """
 
         print('Filtering network by tissue...\n')
@@ -135,6 +171,207 @@ class Network(object):
 
         return TissueSpecificNetwork(filtered_network_file, filtered_nodes_file, self.type_id, self.network_format, tissue_object, permission)
 
+
+    def filter_network_by_method(self, methods_excluded=None, method_ids_excluded=None, methods_included=None, method_ids_included=None, output_network_file=None, output_nodes_file=None):
+        """
+        Filter the network: 
+        - By excluding interactions only reported by methods in 'methods_excluded'
+          and 'method_ids_excluded' list
+        - By including interactions at least reported by one ofthe methods in 
+          'methods_included' list and 'method_ids_included' list
+
+        @param:    methods_excluded
+        @pdef:     Method names list which will exclude interactions if they are
+                   constituted by methods in this list
+        @ptype:    List
+
+        @param:    method_ids_excluded
+        @pdef:     Same as methods_excluded for psi-mi IDs list
+        @ptype:    List
+
+        @param:    methods_included
+        @pdef:     Method names list which will only include interactions that
+                   at least contain one of the methods in this list
+        @ptype:    List
+
+        @param:    method_ids_included
+        @pdef:     Same as methods_included for psi-mi IDs list
+        @ptype:    List
+
+        @param:    output_network_file
+        @pdef:     File where the network will be written
+        @ptype:    String
+
+        @param:    output_nodes_file
+        @pdef:     File where the nodes file will be written
+        @ptype:    String
+
+        @return:   Network object with the filtered network
+        """
+        if self.network_format != 'multi-fields':
+            print('It is only possible to use this method with a multi-fields network\n')
+            sys.exit(10)
+
+        print('Filtering network by method...\n')
+
+        fnet=nx.Graph()
+
+        for u,v,d in self.network.edges_iter(data=True):
+            skip_inc = False
+            skip_exc = False
+
+            # Check if at least one of the imprescindible methods is included
+            if methods_included != None:
+                skip_inc = True
+                for method in d['method_names']:
+                    if method in methods_included:
+                        skip_inc = False
+            if method_ids_included != None:
+                skip_inc = True
+                for method in d['method_ids']:
+                    if method in methods_included:
+                        skip_inc = False
+
+            # Check if the interaction has at least another method apart from
+            # the ones in methods_excluded/method_ids_excluded
+            if methods_excluded != None:
+                skip_exc = True
+                for method in d['method_names']:
+                    if method not in methods_excluded:
+                        skip_exc = False
+
+            if method_ids_excluded != None:
+                method_ids_excluded = [str(x) for x in method_ids_excluded]
+                skip_exc = True
+                for method in d['method_ids']:
+                    if method not in method_ids_excluded:
+                        skip_exc = False
+
+            if skip_inc == False and skip_exc == False:
+                fnet.add_edge(u,v,d)
+
+        self.write_network_file_from_networkx_graph(fnet, output_network_file, output_nodes_file, self.network_format, tissue_specific=self._tissue_specific)
+
+        print('Filtering network by method... finished!\n')
+
+        return Network(output_network_file, output_nodes_file, self.type_id, self.network_format)
+
+    def filter_network_by_number_pubmeds(self, min_num_pubmeds, output_network_file, output_nodes_file):
+        """
+        Filter the network by minimum number of pubmed ids
+
+        @param:    min_num_pubmeds
+        @pdef:     Minimum number of pubmeds which an interaction has to have
+        @ptype:    Integer
+
+        @param:    output_network_file
+        @pdef:     File where the network will be written
+        @ptype:    String
+
+        @param:    output_nodes_file
+        @pdef:     File where the nodes file will be written
+        @ptype:    String
+
+        @return:   Network object with the filtered network
+        """
+        if self.network_format != 'multi-fields':
+            print('It is only possible to use this method with a multi-fields network\n')
+            sys.exit(10)
+
+        print('Filtering network by number of pubmeds...\n')
+
+        fnet=nx.Graph()
+
+        for u,v,d in self.network.edges_iter(data=True):
+            skip_inc = False
+            skip_exc = False
+
+            # Check if it has at least the minimum number of pubmeds required
+            number_pubmeds = len(d['pmids'])
+            if number_pubmeds >= min_num_pubmeds:
+                fnet.add_edge(u,v,d)
+
+        self.write_network_file_from_networkx_graph(fnet, output_network_file, output_nodes_file, self.network_format, tissue_specific=self._tissue_specific)
+
+        print('Filtering network by number of pubmeds... finished!\n')
+
+        return Network(output_network_file, output_nodes_file, self.type_id, self.network_format)
+
+    def filter_network_by_database(self, databases_included, output_network_file, output_nodes_file):
+        """
+        Filter the network by interactions included only in certain databases.
+        If the interaction is from one of the databases, it is included
+
+        @param:    databases_included
+        @pdef:     Databases from which the interaction must come from
+        @ptype:    List
+
+        @param:    output_network_file
+        @pdef:     File where the network will be written
+        @ptype:    String
+
+        @param:    output_nodes_file
+        @pdef:     File where the nodes file will be written
+        @ptype:    String
+
+        @return:   Network object with the filtered network
+        """
+        if self.network_format != 'multi-fields':
+            print('It is only possible to use this method with a multi-fields network\n')
+            sys.exit(10)
+
+        print('Filtering network by databases...\n')
+
+        fnet=nx.Graph()
+
+        for u,v,d in self.network.edges_iter(data=True):
+            skip_inc = False
+            skip_exc = False
+
+            # Check if at least one of the databases is included in the provided
+            # list
+            for database in d['sources']:
+                if database in databases_included:
+                    fnet.add_edge(u,v,d)
+                    break
+
+        self.write_network_file_from_networkx_graph(fnet, output_network_file, output_nodes_file, self.network_format, tissue_specific=self._tissue_specific)
+
+        print('Filtering network by databases... finished!\n')
+
+        return Network(output_network_file, output_nodes_file, self.type_id, self.network_format)
+
+    def write_network_file_from_networkx_graph(self, input_network, output_network_file, output_nodes_file, output_network_format, tissue_specific=False):
+        """
+        Write a network file and a nodes file from a networkx graph object
+        (Currently only available for multi-fields networks)
+        """
+
+        output_network_fd = open(output_network_file, 'w')
+
+        for u,v,d in input_network.edges_iter(data=True):
+            sources = ';'.join(d['sources'])
+            method_ids = ';'.join(d['method_ids'])
+            method_names = ';'.join(d['method_names'])
+            pmids = ';'.join(d['pmids'])
+            if output_network_format == 'multi-fields':
+                if tissue_specific:
+                    tissue_db = ';'.join(d['tissue_db'])
+                    tissue_additional = ';'.join(d['tissue_additional'])
+                    output_network_fd.write('{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\n'.format( u,v,sources,method_ids,method_names,pmids,tissue_db,tissue_additional ))
+                else:
+                    output_network_fd.write('{}\t{}\t{}\t{}\t{}\t{}\n'.format( u,v,sources,method_ids,method_names,pmids ))
+            else:
+                print('Not available format\n')
+                sys.exit(10)
+
+        output_network_fd.close()
+        output_nodes_fd = open(output_nodes_file, 'w')
+
+        for node in self.network.nodes():
+            output_nodes_fd.write('{}\n'.format(node))
+
+        output_nodes_fd.close()
 
 
 class TissueSpecificNetwork(Network):

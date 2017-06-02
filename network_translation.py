@@ -2,8 +2,9 @@ import sys, os
 
 """
     NetworkAnalysis
-    Copyright (C) 2017 Joaquim Aguirre-Plans 
+    2017 Joaquim Aguirre-Plans 
     Structural Bioinformatics Laboratory
+    Universitat Pompeu Fabra
 """
 
 def translate(input_network, input_nodes, translation_file, input_format, output_format, output_network, output_nodes):
