@@ -1,15 +1,23 @@
 import cPickle
 import networkx as nx
+import numpy as np
+import scipy.stats
 import os, sys
 
+import NetworkAnalysis as net
 import NetworkAnalysis.network_translation as NT
 import NetworkAnalysis.tissue_specificity as TS
 
 """
     NetworkAnalysis
-    Copyright (C) 2017 Joaquim Aguirre-Plans 
+    2017 Joaquim Aguirre-Plans 
     Structural Bioinformatics Laboratory
+    Universitat Pompeu Fabra
 """
+
+#################
+#### CLASSES ####
+#################
 
 class Network(object):
     """ 
@@ -44,8 +52,9 @@ class Network(object):
         self.node_file = node_file
         self.type_id = type_id
         self.network_format = network_format
-        self.formats = ['sif', 'multi-fields']
-        self.executable_path = '/home/quim/project/tissue_specificity/scripts'
+        self.formats = ['sif', 'multi-fields', 'raw']
+        self.module_path = os.path.dirname(os.path.abspath(net.__file__))
+        self.pickles_path = '/home/quim/project/tissue_specificity/scripts/pickles'
 
         self._tissue_specific = False
 
@@ -56,12 +65,130 @@ class Network(object):
     ###########
 
     def get_edges(self):
+        """
+        Obtain a list of all the edges, where each edge is a tuple with the two
+        nodes of the interaction
+        """
         return self.network.edges()
 
     def get_nodes(self):
+        """
+        Obtain a list of all the nodes in the network
+        """
         return self.network.nodes()
 
-    def parse_network(self, tissue_specific=False):
+    def get_methodid2interactions(self, verbose=False):
+        """
+        Obtains a dictionary containing all the method IDs that appear in the 
+        network and the number of times that they appear.
+        If verbose:
+        Prints the methods and number of interactions in order (higher to lower)
+        """
+        if self.network_format != 'multi-fields':
+            print('It is only possible to use this method with a multi-fields network\n')
+            sys.exit(10)
+
+        module_path = os.path.dirname(os.path.abspath(net.__file__))
+        psimi2method_file = os.path.join(self.pickles_path,'psimi2method.pcl')
+        self.psimi2method = cPickle.load(open(psimi2method_file))
+
+        methodid2interactions = {}
+
+        for u,v,d in self.network.edges_iter(data=True):
+
+            for method_id in d['method_ids']:
+                method_id = int(method_id)
+                methodid2interactions.setdefault(method_id, 0)
+                methodid2interactions[method_id] += 1
+
+        if verbose:
+            for psimi, interactions in sorted(methodid2interactions.iteritems(), key=lambda (x, y): y, reverse=True):
+                if psimi in self.psimi2method:
+                    name = self.psimi2method[psimi]
+                else:
+                    name = '-'
+                print('Method ID: {}\tName: {}\tNumber of interactions: {}'.format(psimi, name, interactions))
+
+        return methodid2interactions
+
+    def get_method2interactions(self, verbose=False):
+        """
+        Obtains a dictionary containing all the method names that appear in the 
+        network and the number of times that they appear.
+        If verbose:
+        Prints the methods and number of interactions in order (higher to lower)
+        """
+        if self.network_format != 'multi-fields':
+            print('It is only possible to use this method with a multi-fields network\n')
+            sys.exit(10)
+
+        method2interactions = {}
+
+        for u,v,d in self.network.edges_iter(data=True):
+
+            for method in d['method_names']:
+                method2interactions.setdefault(method, 0)
+                method2interactions[method] += 1
+
+        if verbose:
+            for method, interactions in sorted(method2interactions.iteritems(), key=lambda (x, y): y, reverse=True):
+                print('Method: {}\tNumber of interactions: {}'.format(method, interactions))
+
+        return method2interactions
+
+    def get_numpmids2interactions(self, verbose=False):
+        """
+        Obtains a dictionary containing the number of interactions containing a 
+        given number of pubmed IDs
+        If verbose:
+        Prints the number of pubmeds and number of interactions in order of
+        number of pubmeds (higher to lower)
+        """
+        if self.network_format != 'multi-fields':
+            print('It is only possible to use this method with a multi-fields network\n')
+            sys.exit(10)
+
+        numpmids2interactions = {}
+
+        for u,v,d in self.network.edges_iter(data=True):
+
+            num_pmids = len(d['pmids'])
+            numpmids2interactions.setdefault(num_pmids, 0)
+            numpmids2interactions[num_pmids] += 1
+
+        if verbose:
+            for num_pmids, interactions in sorted(numpmids2interactions.iteritems(), key=lambda (x, y): x):
+                print('Number of pubmeds: {}\tNumber of interactions: {}'.format(num_pmids, interactions))
+
+        return numpmids2interactions
+
+    def get_database2interactions(self, verbose=False):
+        """
+        Obtains a dictionary containing all the databases that appear in the 
+        network and the number of times that they appear.
+        If verbose:
+        Prints the databases and number of interactions in order (higher to 
+        lower)
+        """
+        if self.network_format != 'multi-fields':
+            print('It is only possible to use this method with a multi-fields network\n')
+            sys.exit(10)
+
+        database2interactions = {}
+
+        for u,v,d in self.network.edges_iter(data=True):
+
+            for source in d['sources']:
+                database2interactions.setdefault(source, 0)
+                database2interactions[source] += 1
+
+        if verbose:
+            for source, interactions in sorted(database2interactions.iteritems(), key=lambda (x, y): y, reverse=True):
+                print('Database: {}\tNumber of interactions: {}'.format(source, interactions))
+
+        return database2interactions
+
+    def parse_network(self, tissue_specific=False, verbose=False):
         """
         Parse the network file using the Python module NetworkX.
         It is possible to parse the network in two formats:
@@ -70,7 +197,8 @@ class Network(object):
             - 'multi-fields' + tissue_specific=True : <node1>\t<node2>\t<sources>\t<method_ids>\t<method_names>\t<pmids>\t<tissue_db>\t<tissue_additional>
         """
 
-        print('Parsing network...\n')
+        if verbose:
+            print('Parsing network...\n')
 
         G=nx.Graph()
 
@@ -99,12 +227,16 @@ class Network(object):
                     method_names = method_names.split(';')
                     pubmeds = pubmeds.split(';')
                     G.add_edge(node1, node2, sources=sources, method_ids=method_ids, method_names=method_names, pmids=pubmeds)
+            elif self.network_format == 'raw':
+                (node1, node2) = line.strip().split('\t')
+                G.add_edge(node1,node2)
             else:
                 raise IncorrectNetworkFormat(self.network_format, self.formats)
 
         network_fd.close()
 
-        print('Parsing network... finished!\n')
+        if verbose:
+            print('Parsing network... finished!\n')
 
         return G
 
@@ -143,7 +275,7 @@ class Network(object):
         return Network(translated_network, translated_nodes, translation_id, translation_format)
 
 
-    def filter_network_by_tissue(self, filtered_network_file, filtered_nodes_file, tissue_object, permission):
+    def filter_network_by_tissue(self, filtered_network_file, filtered_nodes_file, tissue_object, permission, verbose=False):
         """
         Filter the network using only interactions where the proteins are 
         present in a Tissue object
@@ -165,14 +297,18 @@ class Network(object):
         @ptype:    Integer {0,1,2}
         """
 
-        print('Filtering network by tissue...\n')
+        if verbose:
+            print('Filtering network by tissue...\n')
+
         TS.filter_network_tissue_specific(self.network_file, tissue_object, permission, filtered_network_file, filtered_nodes_file)
-        print('Filtering network by tissue... finished!\n')
+
+        if verbose:
+            print('Filtering network by tissue... finished!\n')
 
         return TissueSpecificNetwork(filtered_network_file, filtered_nodes_file, self.type_id, self.network_format, tissue_object, permission)
 
 
-    def filter_network_by_method(self, methods_excluded=None, method_ids_excluded=None, methods_included=None, method_ids_included=None, output_network_file=None, output_nodes_file=None):
+    def filter_network_by_method(self, methods_excluded=None, method_ids_excluded=None, methods_included=None, method_ids_included=None, output_network_file=None, output_nodes_file=None, verbose=False):
         """
         Filter the network: 
         - By excluding interactions only reported by methods in 'methods_excluded'
@@ -206,13 +342,18 @@ class Network(object):
         @pdef:     File where the nodes file will be written
         @ptype:    String
 
+        @param:    verbose
+        @pdef:     If True, informs about when the parsing starts and ends
+        @ptype:    Bool (Default: False)
+
         @return:   Network object with the filtered network
         """
         if self.network_format != 'multi-fields':
             print('It is only possible to use this method with a multi-fields network\n')
             sys.exit(10)
 
-        print('Filtering network by method...\n')
+        if verbose:
+            print('Filtering network by method...\n')
 
         fnet=nx.Graph()
 
@@ -250,13 +391,14 @@ class Network(object):
             if skip_inc == False and skip_exc == False:
                 fnet.add_edge(u,v,d)
 
-        self.write_network_file_from_networkx_graph(fnet, output_network_file, output_nodes_file, self.network_format, tissue_specific=self._tissue_specific)
+        write_network_file_from_networkx_graph(fnet, output_network_file, output_nodes_file, self.network_format, tissue_specific=self._tissue_specific)
 
-        print('Filtering network by method... finished!\n')
+        if verbose:
+            print('Filtering network by method... finished!\n')
 
         return Network(output_network_file, output_nodes_file, self.type_id, self.network_format)
 
-    def filter_network_by_number_pubmeds(self, min_num_pubmeds, output_network_file, output_nodes_file):
+    def filter_network_by_number_pubmeds(self, min_num_pubmeds, output_network_file, output_nodes_file, verbose=False):
         """
         Filter the network by minimum number of pubmed ids
 
@@ -272,13 +414,18 @@ class Network(object):
         @pdef:     File where the nodes file will be written
         @ptype:    String
 
+        @param:    verbose
+        @pdef:     If True, informs about when the parsing starts and ends
+        @ptype:    Bool (Default: False)
+
         @return:   Network object with the filtered network
         """
         if self.network_format != 'multi-fields':
             print('It is only possible to use this method with a multi-fields network\n')
             sys.exit(10)
 
-        print('Filtering network by number of pubmeds...\n')
+        if verbose:
+            print('Filtering network by number of pubmeds...\n')
 
         fnet=nx.Graph()
 
@@ -291,13 +438,14 @@ class Network(object):
             if number_pubmeds >= min_num_pubmeds:
                 fnet.add_edge(u,v,d)
 
-        self.write_network_file_from_networkx_graph(fnet, output_network_file, output_nodes_file, self.network_format, tissue_specific=self._tissue_specific)
+        write_network_file_from_networkx_graph(fnet, output_network_file, output_nodes_file, self.network_format, tissue_specific=self._tissue_specific)
 
-        print('Filtering network by number of pubmeds... finished!\n')
+        if verbose:
+            print('Filtering network by number of pubmeds... finished!\n')
 
         return Network(output_network_file, output_nodes_file, self.type_id, self.network_format)
 
-    def filter_network_by_database(self, databases_included, output_network_file, output_nodes_file):
+    def filter_network_by_database(self, databases_included, output_network_file, output_nodes_file, verbose=False):
         """
         Filter the network by interactions included only in certain databases.
         If the interaction is from one of the databases, it is included
@@ -314,13 +462,18 @@ class Network(object):
         @pdef:     File where the nodes file will be written
         @ptype:    String
 
+        @param:    verbose
+        @pdef:     If True, informs about when the parsing starts and ends
+        @ptype:    Bool (Default: False)
+
         @return:   Network object with the filtered network
         """
         if self.network_format != 'multi-fields':
             print('It is only possible to use this method with a multi-fields network\n')
             sys.exit(10)
 
-        print('Filtering network by databases...\n')
+        if verbose:
+            print('Filtering network by databases...\n')
 
         fnet=nx.Graph()
 
@@ -335,43 +488,23 @@ class Network(object):
                     fnet.add_edge(u,v,d)
                     break
 
-        self.write_network_file_from_networkx_graph(fnet, output_network_file, output_nodes_file, self.network_format, tissue_specific=self._tissue_specific)
+        write_network_file_from_networkx_graph(fnet, output_network_file, output_nodes_file, self.network_format, tissue_specific=self._tissue_specific)
 
-        print('Filtering network by databases... finished!\n')
+        if verbose:
+            print('Filtering network by databases... finished!\n')
 
         return Network(output_network_file, output_nodes_file, self.type_id, self.network_format)
 
-    def write_network_file_from_networkx_graph(self, input_network, output_network_file, output_nodes_file, output_network_format, tissue_specific=False):
+    def get_number_of_housekeeping_genes(self, housekeeping_genes):
         """
-        Write a network file and a nodes file from a networkx graph object
-        (Currently only available for multi-fields networks)
+        Returns the number of housekeeping genes in the network
+
+        @param:    housekeeping_genes
+        @pdef:     Set containing the dataset of housekeeping genes
+        @ptype:    Set
         """
-
-        output_network_fd = open(output_network_file, 'w')
-
-        for u,v,d in input_network.edges_iter(data=True):
-            sources = ';'.join(d['sources'])
-            method_ids = ';'.join(d['method_ids'])
-            method_names = ';'.join(d['method_names'])
-            pmids = ';'.join(d['pmids'])
-            if output_network_format == 'multi-fields':
-                if tissue_specific:
-                    tissue_db = ';'.join(d['tissue_db'])
-                    tissue_additional = ';'.join(d['tissue_additional'])
-                    output_network_fd.write('{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\n'.format( u,v,sources,method_ids,method_names,pmids,tissue_db,tissue_additional ))
-                else:
-                    output_network_fd.write('{}\t{}\t{}\t{}\t{}\t{}\n'.format( u,v,sources,method_ids,method_names,pmids ))
-            else:
-                print('Not available format\n')
-                sys.exit(10)
-
-        output_network_fd.close()
-        output_nodes_fd = open(output_nodes_file, 'w')
-
-        for node in self.network.nodes():
-            output_nodes_fd.write('{}\n'.format(node))
-
-        output_nodes_fd.close()
+        housekeeping_genes = set([ str(x) for x in housekeeping_genes ])
+        return len( set(self.network.nodes()) & housekeeping_genes )
 
 
 class TissueSpecificNetwork(Network):
@@ -418,7 +551,8 @@ class TissueSpecificNetwork(Network):
         self.type_id = type_id
         self.network_format = network_format
         self.formats = ['sif', 'multi-fields']
-        self.executable_path = '/home/quim/project/tissue_specificity/scripts'
+        self.module_path = os.path.dirname(os.path.abspath(net.__file__))
+        self.pickles_path = '/home/quim/project/tissue_specificity/scripts/pickles'
 
         self.tissue_object = tissue_object
         self.permission = permission
@@ -434,19 +568,21 @@ class TissueSpecificNetwork(Network):
     # METHODS #
     ###########
 
-    def translate_network(self, translation_file, translation_id, translation_format, translated_network, translated_nodes):
+    def translate_network(self, translation_file, translation_id, translation_format, translated_network, translated_nodes, verbose=False):
         """
         Uses a BIANA translation file to return a new Network object with the 
         desired type of IDs and format
         """
-        print('Translating network to {}...\n'.format(translation_id))
+        if verbose:
+            print('Translating network to {}...\n'.format(translation_id))
 
         if self.type_id != 'biana':
             raise IncorrectTypeID(self.type_id)
 
         NT.translate(self.network_file, self.node_file, translation_file, self.network_format, translation_format, translated_network, translated_nodes)
 
-        print('Translating network to {}... finished!\n'.format(translation_id))
+        if verbose:
+            print('Translating network to {}... finished!\n'.format(translation_id))
 
         return TissueSpecificNetwork(translated_network, translated_nodes, translation_id, translation_format, self.tissue_object, self.permission)
 
@@ -477,25 +613,28 @@ class TissueSpecificNetwork(Network):
         Obtain the common tissue-specific interactions between Human Protein
         Atlas and Tissues (Jensen Lab)
         """
-        union = set(self.hpa_edges) & set(self.jensen_edges)
-
-        return union
+        union=nx.Graph()
+        for u,v,d in self.network.edges_iter(data=True):
+            if 'jensen' in d['tissue_db'] or 'hpa' in d['tissue_db']:
+                union.add_edge(u,v,d)
+        return union.edges()
 
     def get_intersection(self):
         """
         Obtain the tissue-specific interactions in Human Protein Atlas, Tissues
         (Jensen Lab) or both
         """
-        intersection = set(self.hpa_edges) | set(self.jensen_edges)
-
-        return intersection
-
+        intersection=nx.Graph()
+        for u,v,d in self.network.edges_iter(data=True):
+            if 'jensen' in d['tissue_db'] and 'hpa' in d['tissue_db']:
+                intersection.add_edge(u,v,d)
+        return intersection.edges()
 
 
 class Tissue(object):
     """ Class defining a tissue object """
 
-    def __init__(self, tissue_terms_hpa, tissue_terms_jensen, jensen_conf=3, hpa_level='medium', hpa_rel='approved'):
+    def __init__(self, tissue_terms_hpa, tissue_terms_jensen, jensen_conf=3, hpa_level='medium', hpa_rel='approved', verbose=False):
         """ 
         @param:    tissue_terms_hpa
         @pdef:     Tissue terms of interest in Human Protein Atlas
@@ -519,6 +658,11 @@ class Tissue(object):
         @pdef:     Reliability cut-off in Human Protein Atlas proteins
         @pdefault: 'approved'
         @ptype:    {String} {'uncertain','approved','supported'}
+
+        @param:    verbose
+        @pdef:     If True, informs about when the parsing starts and ends
+        @pdefault: False
+        @ptype:    Bool
         """
 
         self.tissue_terms_hpa = self.check_tissue_terms(tissue_terms_hpa)
@@ -526,6 +670,7 @@ class Tissue(object):
         self.jensen_conf = jensen_conf
         self.hpa_level = hpa_level
         self.hpa_rel = hpa_rel
+        self.pickles_path = '/home/quim/project/tissue_specificity/scripts/pickles'
 
         # The scales of Human Protein Atlas levels and reliability:
         self.hpa_scale_level = {
@@ -542,11 +687,12 @@ class Tissue(object):
 
         # Mapping files from tissue terms to biana user entities of tissues
 
-        print('Generating tissue...\n')
+        if verbose:
+            print('Generating tissue...\n')
 
-        source_path = '/home/quim/project/tissue_specificity/scripts'
-        BTOname_file = os.path.join(source_path,'BTOname2uE.pcl')
-        HPA_tissue_file = os.path.join(source_path,'tissue2uEs.pcl')
+        self.module_path = os.path.dirname(os.path.abspath(net.__file__))
+        BTOname_file = os.path.join(self.pickles_path,'BTOname2uE.pcl')
+        HPA_tissue_file = os.path.join(self.pickles_path,'tissue2uEs.pcl')
         self.BTOname2uE = cPickle.load(open(BTOname_file))
         self.tissue2uEs = cPickle.load(open(HPA_tissue_file))
 
@@ -556,8 +702,8 @@ class Tissue(object):
 
         # Mapping files from user entities of proteins to user entities of
         # tissues
-        prot2tissues_file = os.path.join(source_path,'UEprot2UETissues.pcl')
-        prot2HPA_file = os.path.join(source_path,'UEprot2UEHPA.pcl')
+        prot2tissues_file = os.path.join(self.pickles_path,'UEprot2UETissues.pcl')
+        prot2HPA_file = os.path.join(self.pickles_path,'UEprot2UEHPA.pcl')
         self.UEprot2UETissues = cPickle.load(open(prot2tissues_file))
         self.UEprot2UEHPA = cPickle.load(open(prot2HPA_file))
 
@@ -566,7 +712,8 @@ class Tissue(object):
         self.proteins_jensen = self.get_tissue_specific_proteins_jensen()
         self.all_tissue_proteins = self.proteins_hpa | self.proteins_jensen
 
-        print('Generating tissue... finished!\n')
+        if verbose:
+            print('Generating tissue... finished!\n')
 
     ###########
     # METHODS #
@@ -678,3 +825,77 @@ class IncorrectTypeID(Exception):
         return 'The initial type of IDs of the network is not biana, it is {}. It is only possible to translate from BIANA codes'.format(self.type_id)
 
 
+###################
+#### FUNCTIONS ####
+###################
+
+def calculate_contingency_table(contingency_table):
+    """Gets a complete network and filters by tissue interactions in the same tissue"""
+    chi2, pval, dof, expected = scipy.stats.chi2_contingency(contingency_table)
+    return chi2, pval, dof, expected
+
+def write_network_file_from_networkx_graph(input_network, output_network_file, output_nodes_file, output_network_format, tissue_specific=False):
+    """
+    Writes a network file and a nodes file from a networkx graph object.
+    (Currently only available for multi-fields networks)
+    """
+
+    output_network_fd = open(output_network_file, 'w')
+
+    if output_network_format == 'multi-fields':
+        for u,v,d in input_network.edges_iter(data=True):
+            sources = ';'.join(d['sources'])
+            method_ids = ';'.join(d['method_ids'])
+            method_names = ';'.join(d['method_names'])
+            pmids = ';'.join(d['pmids'])
+            if tissue_specific:
+                tissue_db = ';'.join(d['tissue_db'])
+                tissue_additional = ';'.join(d['tissue_additional'])
+                output_network_fd.write('{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\n'.format( u,v,sources,method_ids,method_names,pmids,tissue_db,tissue_additional ))
+            else:
+                output_network_fd.write('{}\t{}\t{}\t{}\t{}\t{}\n'.format( u,v,sources,method_ids,method_names,pmids ))
+    elif output_network_format == 'raw':
+        for u,v in input_network.edges_iter():
+            output_network_fd.write('{}\t{}\n'.format( u,v ))
+    else:
+        print('Not available format\n')
+        sys.exit(10)
+
+    output_network_fd.close()
+    output_nodes_fd = open(output_nodes_file, 'w')
+
+    for node in input_network.nodes():
+        output_nodes_fd.write('{}\n'.format(node))
+
+    output_nodes_fd.close()
+
+    return
+
+def get_nodes_intersection_of_two_networks(network1, network2):
+    """Gets the intersecting nodes of two networks"""
+    network1_nodes = set(network1.get_nodes())
+    network2_nodes = set(network2.get_nodes())
+    return network1_nodes & network2_nodes
+
+# def get_edges_intersection_of_two_networks(network1, network2):
+#     """Gets the intersecting edges of two networks"""
+#     intersection = set()
+#     network2_edges = network2.get_edges()
+#     for u,v in network1.network.edges_iter():
+#         comb1 = (u,v)
+#         comb2 = (v,u)
+#         if comb1 in network2_edges or comb2 in network2_edges:
+#             if comb1 in network2_edges:
+#                 intersection.add(comb1)
+#             else:
+#                 intersection.add(comb2)
+#     return intersection
+def get_edges_intersection_of_two_networks(network1, network2):
+    """Gets the intersecting edges of two networks"""
+    network1_edges = network1.get_edges()
+    network2_edges = network2.get_edges()
+
+    network1_set = set(frozenset(i) for i in network1_edges)
+    network2_set = set(frozenset(i) for i in network2_edges)
+
+    return network1_set & network2_set

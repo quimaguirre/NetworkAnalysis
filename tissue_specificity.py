@@ -2,12 +2,84 @@ import argparse
 import cPickle
 import mysql.connector
 import os, sys
+import NetworkAnalysis as net
 
 """
     NetworkAnalysis
-    Copyright (C) 2017 Joaquim Aguirre-Plans 
+    2017 Joaquim Aguirre-Plans 
     Structural Bioinformatics Laboratory
+    Universitat Pompeu Fabra
 """
+
+#################
+#### CLASSES ####
+#################
+
+class HouseKeepingGenes(object):
+    """ Class defining a HouseKeepingGenes object """
+
+    def __init__(self, type_id):
+        """ 
+        @param:    type_id
+        @pdef:     Type of IDs in the network
+        @ptype:    {String}
+        """
+
+        self.module_path = os.path.dirname(os.path.abspath(net.__file__))
+        self.pickles_path = '/home/quim/project/tissue_specificity/scripts/pickles'
+        self.type_id = type_id
+
+        self.hpa_hk_genes = self.get_hpa_hk_genes()
+        self.eisenberg_hk_genes = self.get_eisenberg_hk_genes()
+        self.all_hk_genes = self.get_all_hk_genes()
+
+
+    def get_hpa_hk_genes(self):
+        """
+        Obtains a set containing the Human Protein Atlas house keeping genes
+        """
+
+        if self.type_id == 'biana':
+            hpa_uE_dump = os.path.join(self.pickles_path,'hpa_hk_uEs.pcl')
+            hpa_hk_genes = cPickle.load(open(hpa_uE_dump))
+        elif self.type_id == 'geneid':
+            hpa_geneid_dump = os.path.join(self.pickles_path,'hpa_hk_geneIDs.pcl')
+            hpa_hk_genes = cPickle.load(open(hpa_geneid_dump))
+        else:
+            print('The input_type must be \'geneid\' or \'biana\'\n')
+            sys.exit(10)
+
+        return hpa_hk_genes
+
+    def get_eisenberg_hk_genes(self):
+        """
+        Obtains a set containing the Eisenberg data of house keeping genes
+        """
+
+        if self.type_id == 'biana':
+            elieis_uE_dump = os.path.join(self.pickles_path,'eisenberg_hk_uEs.pcl')
+            eisenberg_hk_genes = cPickle.load(open(elieis_uE_dump))
+        elif self.type_id == 'geneid':
+            elieis_geneid_dump = os.path.join(self.pickles_path,'eisenberg_hk_geneIDs.pcl')
+            eisenberg_hk_genes = cPickle.load(open(elieis_geneid_dump))
+        else:
+            print('The input_type must be \'geneid\' or \'biana\'\n')
+            sys.exit(10)
+
+        return eisenberg_hk_genes
+
+    def get_all_hk_genes(self):
+        """
+        Obtains a set containing all the house keeping genes in Human Protein
+        Atlas and Eisenberg datasets
+        """
+        return self.hpa_hk_genes | self.eisenberg_hk_genes
+
+
+###################
+#### FUNCTIONS ####
+###################
+
 
 def filter_network_tissue_specific(input_network, tissue, permission, output_network, output_nodes):
     """Gets a complete network and filters by tissue interactions in the same tissue"""
