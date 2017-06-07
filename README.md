@@ -21,7 +21,7 @@ python scripts/generate_netscore_files_vapr2017.py -radius 0 -taxid 9606 -node m
 * taxid		: Taxonomy ID used to filter the network by species-specific interactions
 * node 		: Name of the output file that will contain the nodes of the network (in BIANA codes)
 * edge 		: Name of the output file that will contain the edges of the network (in BIANA codes)
-* trans 	: Name of the output file that will contain the translation from BIANA codes to <ttype>
+* trans 	: Name of the output file that will contain the translation from BIANA codes to \<ttype\>
 * ttype 	: Type of code in which you want to translate your network
 * format 	: Format of the network. It can be multi-fields or guild
 * eAFF 		: Filter the network by the methods included in the affinity_dict dictionary inside the script
@@ -51,7 +51,7 @@ main_network.get_nodes()
 ```
 
 
-### 4. Translate the network to <ttype> with this fancy method!
+### 4. Translate the network to \<ttype\> with this fancy method!
 
 ```
 translation_file = 'human_network.eAFF.010617.geneid.trans')
