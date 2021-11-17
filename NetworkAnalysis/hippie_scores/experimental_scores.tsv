@@ -1,0 +1,126 @@
+Technique	PSI	score
+3 hybrid method	MI:0588	5
+acetylation assay		7.5
+Affinity Capture-Luminescence		5
+Affinity Capture-MS		5
+Affinity Capture-RNA		2
+Affinity Capture-Western		5
+affinity chromatography technology	MI:0004	5
+affinity technology	MI:0400	5
+anti baitcoimmunoprecipitation	MI:0006	5
+anti tagcoimmunoprecipitation	MI:0007	5
+antibody array	MI:0678	5
+array technology	MI:0008	3
+atomic force microscopy	MI:0872	9
+beta galactosidase complementation	MI:0010	5
+beta lactamase complementation	MI:0011	5
+bimolecular fluorescence complementation	MI:0809	6
+Biochemical	MI:0401	1
+Biochemical Activity		5
+bioluminescence resonance energy transfer	MI:0012	6
+Biophysical	MI:0013	1
+blue native page	MI:0276	3
+chromatin immunoprecipitation assay	MI:0402	2
+chromatography technology	MI:0091	1
+circular dichroism	MI:0016	9
+classical fluorescence spectroscopy	MI:0017	7.5
+Co-crystal Structure		10
+Co-fractionation		1
+Co-localization		1
+coimmunoprecipitation	MI:0019	5
+colocalization by fluorescent probes cloning	MI:0021	1
+colocalization by immunostaining	MI:0022	1
+colocalization/visualisation technologies	MI:0023	1
+comigration in gel electrophoresis	MI:0807	3
+comigration in non denaturing gel electrophoresis	MI:0404	3
+comigration in sds page	MI:0808	3
+competition binding	MI:0405	5
+confocal microscopy	MI:0663	1
+copurification	MI:0025	2
+cosedimentation	MI:0027	2
+cosedimentation in solution	MI:0028	2
+cosedimentation through density gradient	MI:0029	2
+cross-linking study	MI:0030	5
+deacetylase assay	MI:0406	7.5
+demethylase assay	MI:0870	7.5
+dihydrofolatereductase reconstruction	MI:0111	6
+dynamic light scattering	MI:0038	9
+electron microscopy	MI:0040	5
+electron paramagnetic resonance	MI:0042	9
+electron tomography	MI:0410	9
+electrophoretic mobility shift assay	MI:0413	2
+electrophoretic mobility supershift assay	MI:0412	2
+enzymatic study	MI:0415	1
+enzyme linked immunosorbent assay	MI:0411	5
+experimental interaction detection	MI:0045	1
+far western blotting	MI:0047	5
+filamentous phage display	MI:0048	6
+filter binding	MI:0049	5
+fluorescence correlation spectroscopy	MI:0052	10
+fluorescence microscopy	MI:0416	1
+fluorescence polarization spectroscopy	MI:0053	10
+fluorescence technology	MI:0051	1
+fluorescence-activated cell sorting	MI:0054	1
+fluorescent resonance energy transfer	MI:0055	6
+footprinting	MI:0417	3
+FRET		6
+gal4 vp16 complementation	MI:0728	5
+genetic interference	MI:0254	0
+gst pull down	MI:0059	5
+gtpase assay	MI:0419	7.5
+his pull down	MI:0061	5
+homogeneous time resolved fluorescence	MI:0510	7
+imaging technique	MI:0428	1
+in vitro	MI:0492	1
+in vivo	MI:0493	1
+in-gel kinase assay	MI:0423	7.5
+inferred by curator	MI:0364	1
+ion exchange chromatography	MI:0226	3
+isothermal titration calorimetry	MI:0065	10
+kinase homogeneous time resolved fluorescence	MI:0420	7.5
+lambda phage display	MI:0066	6
+lex-a dimerization assay	MI:0369	5
+light microscopy	MI:0426	1
+light scattering	MI:0067	10
+mammalian protein protein interaction trap	MI:0231	6
+mass spectrometry studies of complexes	MI:0069	5
+methyltransferase assay	MI:0515	7.5
+methyltransferase radiometric assay	MI:0516	7.5
+molecular sieving	MI:0071	2
+no experiment assigned		0
+nuclear magnetic resonance	MI:0077	10
+peptide array	MI:0081	5
+phage display	MI:0084	6
+phosphatase assay	MI:0434	7.5
+phosphotransfer assay		7.5
+polymerization	MI:0953	5
+protease assay	MI:0435	7.5
+protein array	MI:0089	5
+protein complementation assay	MI:0090	5
+protein cross-linking with a bifunctional reagent	MI:0031	5
+protein kinase assay	MI:0424	7.5
+protein tri hybrid	MI:0437	5
+Protein-peptide		5
+Protein-RNA		0
+pull down	MI:0096	2.5
+pull-down/mass spectrometry		5
+Reconstituted Complex		10
+reverse phase chromatography	MI:0227	1
+reverse two hybrid	MI:0726	5
+ribonuclease assay	MI:0920	7.5
+saturation binding	MI:0440	7.5
+scintillation proximity assay	MI:0099	7.5
+solid phase assay	MI:0892	1
+surface plasmon resonance	MI:0107	10
+t7 phage display	MI:0108	6
+tandem affinity purification	MI:0676	5
+tox-r dimerization assay	MI:0370	5
+transcriptional complementation assay	MI:0232	5
+transmission electron microscopy	MI:0020	5
+two hybrid fragment pooling approach	MI:0399	5
+Two-hybrid	MI:0018	5
+ubiquitin reconstruction	MI:0112	5
+x ray scattering	MI:0826	9
+x-ray crystallography	MI:0114	10
+x-ray fiber diffraction	MI:0825	9
+yeast display	MI:0115	5

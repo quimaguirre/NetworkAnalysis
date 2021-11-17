@@ -14,18 +14,24 @@ and validate them.
 ### 1. Create the network using the following script (requires BIANA):
 
 ```
-python scripts/generate_netscore_files_vapr2017.py -radius 0 -taxid 9606 -node main/human_nodes.eAFF.biana.010617.txt -edge main/human_edges.eAFF.biana.010617.txt -trans main/human_network.eAFF.010617 -ttype geneid -format multi-fields -eAFF -v
+python scripts/generate_network.py -radius 0 -taxid 9606 -node workspace/human_nodes.eAFF.biana.010617.txt -edge workspace/human_edges.eAFF.biana.010617.txt -trans workspace/human_network.eAFF.010617 -ttype geneid -format multi-fields -eAFF -v
 ```
 
-* radius	: Expansion of the network. If 0, it plots the complete interactome
-* taxid		: Taxonomy ID used to filter the network by species-specific interactions
-* node 		: Name of the output file that will contain the nodes of the network (in BIANA codes)
-* edge 		: Name of the output file that will contain the edges of the network (in BIANA codes)
-* trans 	: Name of the output file that will contain the translation from BIANA codes to \<ttype\>
-* ttype 	: Type of code in which you want to translate your network
-* format 	: Format of the network. It can be multi-fields or guild
-* eAFF 		: Filter the network by the methods included in the affinity_dict dictionary inside the script
-* v 		: Verbose
+* radius	: Network is built in a radius of connections around the seed proteins. If 0, it plots the complete interactome.
+* taxid		: Taxonomy ID used to filter the network by species-specific interactions.
+* iseed		: File containing the seeds (separated by new lines). Only if a network of expansion is wanted.
+* edge 		: Name of the output file that will contain the edges of the network (in BIANA codes).
+* node 		: Name of the output file that will contain the nodes of the network (in BIANA codes).
+* trans 	: Name of the output file that will contain the translation from BIANA codes to \<ttype\>.
+* strans 	: Name of the output file that will contain the translation of seeds from BIANA codes to \<ttype\>.
+* ttype 	: Type of code in which you want to translate your network.
+* sttype 	: Type of code identifier of the seeds.
+* format 	: Format of the network. It can be \<sif\>, \<netscore\>, \<raw\>, \<multi-fields\>.
+* rY2H 		: Include only interactions coming from yeast-two-hybrid.
+* eY2H 		: Exclude the interactions coming only from yeast-two-hybrid.
+* rAFF 		: Include only interactions coming from affinity methods.
+* eAFF 		: Exclude the interactions coming only from affinity methods.
+* v 		: Verbose.
 
 (There is an example of network in the package)
 

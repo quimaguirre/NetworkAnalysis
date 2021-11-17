@@ -1,0 +1,70 @@
+import sys, os
+
+from context import NetworkAnalysis
+import NetworkAnalysis.network_analysis as NA
+
+
+
+def main():
+
+    options = parse_user_arguments()
+    create_guildify_files(options)
+
+def parse_user_arguments(*args, **kwds):
+    """
+    Parses the arguments of the program
+    """
+
+    parser = argparse.ArgumentParser(
+        description = "Create a tissue-specific network",
+        epilog      = "@oliva's lab 2017")
+    parser.add_argument('-n','--network_file',dest='network_file',action = 'store',
+                        help = """" Input file with a protein-protein interaction network in SIF format. """)
+    parser.add_argument('-ws','--workspace',dest='workspace',action = 'store',default=os.path.join(os.path.join(os.path.dirname(__file__), '..'), 'workspace'),
+                        help = """Define the workspace directory where the results will be created. """)
+
+    options=parser.parse_args()
+
+    return options
+
+
+#################
+#################
+# MAIN FUNCTION #
+#################
+#################
+
+def create_guildify_files(options):
+    """
+    Generates the profiles of the input drug
+    """
+
+    # Define the parameters
+    output_node_file = os.path.join(options.workspace_dir, 'guildify.nodes.txt')
+    output_edge_file = os.path.join(options.workspace_dir, 'guildify.edges.txt')
+    output_edge_file_diamond = os.path.join(options.workspace_dir, 'guildify.diamond.txt')
+    type_id = 'biana'
+    network_format = 'multi-fields'
+
+    # Define the network instance
+    network_instance = NA.Network(options.network_file, type_id, network_format, node_file=None)
+
+    # Define the networkX graph
+    nx_graph = network_instance.network
+
+    # Create the GUILDify files
+    NA.write_node_and_edge_files_for_guildify_from_networkx_graph(nx_graph, type_id, output_node_file, output_edge_file, output_edge_file_diamond)
+
+    return
+
+
+#######################
+#######################
+# SECONDARY FUNCTIONS #
+#######################
+#######################
+
+
+if  __name__ == "__main__":
+    main()
+

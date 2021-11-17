@@ -1,0 +1,151 @@
+TO DO
+
+Update dictionaries of BIANA:
+
+python /home/quim/PHD/Projects/NetworkAnalysis/scripts/update_affinity_and_complementation_methods.py
+
+
+
+Generate network of expansion:
+
+python /home/quim/PHD/Projects/NetworkAnalysis/scripts/generate_network.py -radius 2 -iseed /home/quim/PHD/Projects/NetworkAnalysis/workspace/seeds_file.txt -taxid 9606 -node /home/quim/PHD/Projects/NetworkAnalysis/workspace/exnet.nodes -edge /home/quim/PHD/Projects/NetworkAnalysis/workspace/exnet.edges -strans /home/quim/PHD/Projects/NetworkAnalysis/workspace/translation_seeds_to_BIANA_codes.txt -trans /home/quim/PHD/Projects/NetworkAnalysis/workspace/exnet.trans -stype geneid -ttype geneid -format multi-fields -rY2H
+
+Generate complete interactome:
+
+(With GeneID)
+python /home/quim/PHD/Projects/NetworkAnalysis/scripts/generate_network.py -radius 0 -taxid 9606 -edge /home/quim/PHD/Projects/NetworkAnalysis/workspace/human_edges.eAFF.biana.nov17.txt -node /home/quim/PHD/Projects/NetworkAnalysis/workspace/human_nodes.eAFF.biana.nov17.txt -trans /home/quim/PHD/Projects/NetworkAnalysis/workspace/human_network.eAFF.nov17.geneid.trans -ttype geneid -format multi-fields -eAFF
+
+(With UniprotEntry)
+python /home/quim/PHD/Projects/NetworkAnalysis/scripts/generate_network.py -radius 0 -taxid 9606 -edge /home/quim/data/networks/human_eAFF_nov17/uniprot/human_edges.eAFF.biana.nov17.txt -node /home/quim/data/networks/human_eAFF_nov17/uniprot/human_nodes.eAFF.biana.nov17.txt -trans /home/quim/data/networks/human_eAFF_nov17/uniprot/human_network.eAFF.nov17.geneid.trans -ttype uniprotentry -format multi-fields -eAFF
+
+Obtain data of tissue-specificity:
+
+python /home/quim/PHD/Projects/NetworkAnalysis/scripts/obtain_data.py
+(Last update using geneID_seqtax protocol (7), 28/01/18)
+
+Create tissue-specific network:
+
+python /home/quim/PHD/Projects/NetworkAnalysis/scripts/create_tissue_specific_network.py -n /home/quim/PHD/Projects/NetworkAnalysis/workspace/human_edges.eAFF.biana.nov17.txt -t liver -trans /home/quim/PHD/Projects/NetworkAnalysis/workspace/human_network.eAFF.nov17.geneid.trans 
+
+PPI network comparative analysis
+
+python /home/quim/PHD/Projects/NetworkAnalysis/scripts/ppi_network_comparative_analysis.py -n /home/quim/PHD/Projects/NetworkAnalysis/workspace/human_edges.eAFF.biana.nov17.txt -trans /home/quim/PHD/Projects/NetworkAnalysis/workspace/human_network.eAFF.nov17.geneid.trans
+
+R analyses:
+
+Rscript /home/quim/PHD/Projects/NetworkAnalysis/scripts/analyze_hpa_rnaseq.R
+
+Create files for GUILDify:
+
+python /home/quim/PHD/Projects/NetworkAnalysis/scripts/create_guildify_files.py -n /home/quim/PHD/Projects/NetworkAnalysis/workspace/human_edges.eAFF.biana.nov17.txt
+
+python /home/quim/PHD/Projects/NetworkAnalysis/scripts/create_guildify_files.py -n /home/quim/PHD/Projects/NetworkAnalysis/workspace/tissue_specific_networks/brain/brain_edges.biana.nov17.method_ex.txt -ws /home/quim/PHD/Projects/NetworkAnalysis/workspace/tissue_specific_networks/brain/ -ts
+python /home/quim/PHD/Projects/NetworkAnalysis/scripts/create_guildify_files.py -n /home/quim/PHD/Projects/NetworkAnalysis/workspace/tissue_specific_networks/heart/heart_edges.biana.nov17.method_ex.txt -ws /home/quim/PHD/Projects/NetworkAnalysis/workspace/tissue_specific_networks/heart/ -ts
+python /home/quim/PHD/Projects/NetworkAnalysis/scripts/create_guildify_files.py -n /home/quim/PHD/Projects/NetworkAnalysis/workspace/tissue_specific_networks/kidney/kidney_edges.biana.nov17.method_ex.txt -ws /home/quim/PHD/Projects/NetworkAnalysis/workspace/tissue_specific_networks/kidney/ -ts
+python /home/quim/PHD/Projects/NetworkAnalysis/scripts/create_guildify_files.py -n /home/quim/PHD/Projects/NetworkAnalysis/workspace/tissue_specific_networks/liver/liver_edges.biana.nov17.method_ex.txt -ws /home/quim/PHD/Projects/NetworkAnalysis/workspace/tissue_specific_networks/liver/ -ts
+python /home/quim/PHD/Projects/NetworkAnalysis/scripts/create_guildify_files.py -n /home/quim/PHD/Projects/NetworkAnalysis/workspace/tissue_specific_networks/pancreas/pancreas_edges.biana.nov17.method_ex.txt -ws /home/quim/PHD/Projects/NetworkAnalysis/workspace/tissue_specific_networks/pancreas/ -ts
+
+Translate mouse interactome:
+python /home/quim/PHD/Projects/NetworkAnalysis/scripts/translate_network.py -in /sbi/users/interchange/quim/tissue_specificity/mouse/main/mouse_edges.eAFF.biana.txt -if multi-fields -on /sbi/users/interchange/quim/tissue_specificity/mouse/main/mouse_edges.eAFF.geneID.txt -of multi-fields -trans /sbi/users/interchange/quim/tissue_specificity/mouse/main/mouse_network.eAFF.010617.geneid.trans
+
+Rat interactome:
+python /home/quim/PHD/Projects/NetworkAnalysis/scripts/generate_network.py -radius 0 -taxid 10116 -edge /home/quim/PHD/Projects/NetworkAnalysis/workspace/rat_edges.eAFF.biana.nov17.txt -node /home/quim/PHD/Projects/NetworkAnalysis/workspace/rat_nodes.eAFF.biana.nov17.txt -trans /home/quim/PHD/Projects/NetworkAnalysis/workspace/rat_network.eAFF.nov17.geneid.trans -ttype geneid -format multi-fields -eAFF
+Translate rat interactome:
+python /home/quim/PHD/Projects/NetworkAnalysis/scripts/translate_network.py -in /sbi/users/interchange/quim/tissue_specificity/rat/main/rat_edges.eAFF.biana.nov17.txt -if multi-fields -on /sbi/users/interchange/quim/tissue_specificity/rat/main/rat_edges.eAFF.geneID.nov17.txt -of multi-fields -trans /sbi/users/interchange/quim/tissue_specificity/rat/main/rat_network.eAFF.nov17.geneid.trans
+
+Create network in GUILDify style:
+python /home/quim/PHD/Projects/NetworkAnalysis/scripts/create_network_in_GUILDify_style.py
+
+Create multi-fields from GUILDIFY style:
+python /home/quim/PHD/Projects/NetworkAnalysis/scripts/create_multi_fields_from_guildify.py -i /var/www/html/GUILDify2/data/10090/network_filtered.sif -met /var/www/html/GUILDify2/data/10090/network_method_id.eda -pub /var/www/html/GUILDify2/data/10090/network_pubmed.eda -src /var/www/html/GUILDify2/data/10090/network_source.eda -o /home/quim/PHD/Projects/NetworkAnalysis/workspace/mouse_network_guildify_to_multifields.txt
+
+Filter multi-fields file with HIPPIE scores:
+python /home/quim/PHD/Projects/NetworkAnalysis/scripts/filter_network_by_hippie_methods.py -n /home/quim/PHD/Projects/NetworkAnalysis/workspace/mouse_network_guildify_to_multifields.txt -o /home/quim/PHD/Projects/NetworkAnalysis/workspace/mouse_network_filtered_hippie.txt -s 3
+
+Create files for GUILDify:
+python /home/quim/PHD/Projects/NetworkAnalysis/scripts/create_guildify_files.py -n /home/quim/PHD/Projects/NetworkAnalysis/workspace/mouse_network_filtered_hippie.txt
+
+Analyze network:
+python /home/quim/PHD/Projects/NetworkAnalysis/scripts/analyze_network.py -n /home/quim/data/networks/mouse_guildify_jan18/mouse_network_guildify_to_multifields.txt -f multi-fields
+Filter network
+python /home/quim/PHD/Projects/NetworkAnalysis/scripts/filter_network.py -n /home/quim/data/networks/mouse_guildify_jan18/mouse_network_guildify_to_multifields.txt -npmid 2 -ndbs 2 -eAFF
+
+
+
+GENERATE COMPLETE INTERACTOME
+
+python /home/quim/PHD/Projects/NetworkAnalysis/scripts/generate_network.py -radius 0 -taxid 9606 -edge /home/quim/data/networks/human_complete_nov17/human_edges.biana.nov17.txt -node /home/quim/data/networks/human_complete_nov17/human_nodes.biana.nov17.txt -trans /home/quim/data/networks/human_complete_nov17/human_network.nov17.geneID.trans -ttype geneid -format multi-fields
+
+TRANSLATE COMPLETE INTERACTOME
+
+python /home/quim/PHD/Projects/NetworkAnalysis/scripts/translate_network.py -in /home/quim/data/networks/human_complete_nov17/human_edges.biana.nov17.txt -if multi-fields -on /home/quim/data/networks/human_complete_nov17/human_edges.geneID.nov17.txt -of multi-fields -trans /home/quim/data/networks/human_complete_nov17/human_network.nov17.geneID.trans
+
+ANALYZE COMPLETE INTERACTOME
+
+python /home/quim/PHD/Projects/NetworkAnalysis/scripts/analyze_network.py -n /home/quim/data/networks/human_complete_nov17/human_edges.geneID.nov17.txt -f multi-fields
+
+FILTER THE INTERACTOME
+
+python /home/quim/PHD/Projects/NetworkAnalysis/scripts/filter_network.py -n /home/quim/data/networks/human_complete_nov17/human_edges.geneID.nov17.txt -ws /home/quim/data/networks/human_complete_nov17/filtered_networks/default_filter -npmid 2 -ndbs 2 -nmet 2 -wh
+
+FILTER BY HIPPIE (INCLUDE) JUST TO TRY
+
+python /home/quim/PHD/Projects/NetworkAnalysis/scripts/filter_network_by_hippie_methods.py -n /home/quim/data/networks/human_complete_nov17/human_edges.geneID.nov17.txt  -o /home/quim/data/networks/human_complete_nov17/hippie/human_edges.geneID.nov17.hippie.5inc.txt -s 5 -c include
+
+CREATE PERFECT NETWORK
+
+python /home/quim/PHD/Projects/NetworkAnalysis/scripts/create_perfect_filtered_network.py -n /home/quim/data/networks/human_complete_nov17/human_edges.geneID.nov17.txt -ws /home/quim/data/networks/human_complete_nov17/filtered_networks
+
+
+
+GENERATE COMPLETE (HUMAN) INTERACTOME FROM GUILDIFY FILES
+
+python /home/quim/PHD/Projects/NetworkAnalysis/scripts/create_multi_fields_from_guildify.py -i /home/quim/data/networks/human_guildify_jan18/network.sif -nod /home/quim/data/networks/human_guildify_jan18/node_info.txt -met /home/quim/data/networks/human_guildify_jan18/network_method_id.eda -pub /home/quim/data/networks/human_guildify_jan18/network_pubmed.eda -src /home/quim/data/networks/human_guildify_jan18/network_source.eda -o /home/quim/data/networks/human_guildify_jan18/multifields/human_network_guildify_jan18.multifields -ot /home/quim/data/networks/human_guildify_jan18/multifields/human_network_guildify_jan18.trans
+
+GENERATE COMPLETE (MOUSE) INTERACTOME FROM GUILDIFY FILES
+
+python /home/quim/PHD/Projects/NetworkAnalysis/scripts/create_multi_fields_from_guildify.py -i /home/quim/data/networks/mouse_guildify_jan18/network_filtered.sif -nod /home/quim/data/networks/mouse_guildify_jan18/node_info.txt -met /home/quim/data/networks/mouse_guildify_jan18/network_method_id.eda -pub /home/quim/data/networks/mouse_guildify_jan18/network_pubmed.eda -src /home/quim/data/networks/mouse_guildify_jan18/network_source.eda -o /home/quim/data/networks/mouse_guildify_jan18/multifields/mouse_network_guildify_jan18.multifields -ot /home/quim/data/networks/mouse_guildify_jan18/multifields/mouse_network_guildify_jan18.trans
+
+TRANSLATE THE INTERACTOME TO GENEID
+
+python /home/quim/PHD/Projects/NetworkAnalysis/scripts/translate_network.py -in /home/quim/data/networks/human_guildify_jan18/multifields/human_network_guildify_jan18.multifields -if multi-fields -on /home/quim/data/networks/human_guildify_jan18/multifields/human_network_guildify_jan18.geneID.multifields -of multi-fields -trans /home/quim/data/networks/human_guildify_jan18/multifields/human_network_guildify_jan18.trans.geneID
+
+ANALYZE THE INTERACTOME
+
+python /home/quim/PHD/Projects/NetworkAnalysis/scripts/analyze_network.py -n /home/quim/data/networks/human_guildify_jan18/multifields/human_network_guildify_jan18.geneID.multifields -f multi-fields
+
+FILTER THE INTERACTOME
+
+python /home/quim/PHD/Projects/NetworkAnalysis/scripts/filter_network.py -n /home/quim/data/networks/human_guildify_jan18/multifields/human_network_guildify_jan18.geneID.multifields -ws /home/quim/data/networks/human_guildify_jan18/multifields -npmid 2 -ndbs 2 -nmet 2 -eAFF
+
+VALIDATE NETWORKS
+python /home/quim/PHD/Projects/NetworkAnalysis/scripts/validate_network.py -n /home/quim/data/networks/human_guildify_jan18/multifields/network.pmid.txt -t geneID -f multi-fields
+
+FILTER BY HIPPIE (INCLUDE) JUST TO TRY
+python /home/quim/PHD/Projects/NetworkAnalysis/scripts/filter_network_by_hippie_methods.py -n /home/quim/data/networks/human_guildify_jan18/multifields/human_network_guildify_jan18.geneID.multifields -o /home/quim/data/networks/human_guildify_jan18/multifields/human_network_guildify_jan18_filtered_hippie_include.geneID.multifields -s 3 -c include
+
+CREATE PERFECT FILTERED NETWORK (TRIALS)
+python /home/quim/PHD/Projects/NetworkAnalysis/scripts/create_perfect_filtered_network.py -n /home/quim/data/networks/human_guildify_jan18/multifields/human_network_guildify_jan18.geneID.multifields -ws /home/quim/data/networks/human_guildify_jan18/multifields
+
+VALIDATE THE NETWORK
+python /home/quim/PHD/Projects/NetworkAnalysis/scripts/validate_network.py -n /home/quim/data/networks/human_guildify_jan18/multifields/network.semiconfidence.3pmid.txt -t geneID -f multi-fields
+
+
+Change format:
+python /home/quim/PHD/Projects/NetworkAnalysis/scripts/change_format.py -i /home/quim/data/networks/test_BIANA_MAY_2018/guildify2/filtered_phy/network.method.txt -o /home/quim/data/networks/test_BIANA_MAY_2018/guildify2/filtered_phy/network.method.sif -iformat multi-fields -oformat sif
+
+
+GITHUB
+
+CLONE repo:
+git clone https://github.com/quimaguirre/diana.git diana_git
+
+
+$> cd Documents/diana_git/
+$> git pull origin master
+$> cp /Users/quim/Documents/diana . # Or copy directly from finder the directory
+$> git status
+$> git add *
+$> git rm */*/.DS_Store
+$> git commit -m "Generation of profiles improved"
+$> git push -u origin master 

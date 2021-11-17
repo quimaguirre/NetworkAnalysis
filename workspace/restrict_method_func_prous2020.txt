@@ -1,0 +1,40 @@
+6	anti bait coimmunoprecipitation
+16	circular dichroism
+17	classical fluorescence spectroscopy
+18	two hybrid
+38	dynamic light scattering
+42	electron paramagnetic resonance
+52	fluorescence correlation spectroscopy
+53	fluorescence polarization spectroscopy
+65	isothermal titration calorimetry
+67	light scattering
+77	nuclear magnetic resonance
+99	scintillation proximity assay
+107	surface plasmon resonance
+114	x-ray crystallography
+397	two hybrid array
+398	two hybrid pooling approach
+399	two hybrid fragment pooling approach
+406	deacetylase assay
+410	3D electron microscopy
+419	gtpase assay
+420	kinase homogeneous time resolved fluorescence
+423	in-gel kinase assay
+424	protein kinase assay
+434	phosphatase assay
+435	protease assay
+440	saturation binding
+510	homogeneous time resolved fluorescence
+515	methyltransferase assay
+516	methyltransferase radiometric assay
+825	x-ray fiber diffraction
+826	x ray scattering
+870	demethylase assay
+872	atomic force microscopy
+920	ribonuclease assay
+1111	two hybrid bait or prey pooling approach
+1112	two hybrid prey pooling approach
+1113	two hybrid bait and prey pooling approach
+1320	membrane yeast two hybrid
+1356	validated two hybrid
+2215	barcode fusion genetics two hybrid
