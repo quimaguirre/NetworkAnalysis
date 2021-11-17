@@ -1,0 +1,60 @@
+#####################################
+#  BIANA: GUIDE THROUGH THE SCRIPTS #
+#####################################
+
+------------------------
+Before using the scripts
+------------------------
+
+- Modify the config.ini file in ./scripts so that the database information is correct.
+
+- Use Python 2.7.11:
+    module load Python/2.7.11
+
+--------------
+Mining scripts
+--------------
+
+python ./scripts/BIANA_mine_info.py
+
+    ---> Get mappings/information associated to a list of proteins
+    ---> Example: python /home/quim/PHD/Projects/BIANA/scripts/BIANA_mine_info.py -i /home/quim/PHD/Projects/BIANA/data/COVID_test.txt -t genesymbol -o /home/quim/PHD/Projects/BIANA/outputs/COVID_info.txt -v
+
+python ./scripts/BIANA_mine_interactions.py
+
+    ---> Get proteins that are interacting with a list of proteins
+    ---> Example: python /home/quim/PHD/Projects/BIANA/scripts/BIANA_mine_interactions.py -i /home/quim/PHD/Projects/BIANA/data/COVID_test.txt -t genesymbol -o /home/quim/PHD/Projects/BIANA/outputs/COVID_interactions.txt -v
+    ---> Example: python /sbi/users/interchange/quim/baldo/BIANA/scripts/BIANA_mine_interactions.py -i /sbi/users/interchange/quim/baldo/BIANA/data/TTR.txt -t uniprotaccession -o /sbi/users/interchange/quim/baldo/BIANA/outputs/TTR/TTR_out.txt -v
+scripts
+
+-------
+Scripts
+-------
+
+python ./scripts/update_affinity_and_complementation_methods.py
+
+    ---> Create a dictionary where the keys are the psi-mi-obo IDs associated to PPI detection methods and the values are the names of the methods.
+         The dictionary created is used to filter by methods in the script generate_network_interactomix.py
+    ---> Example: python /home/quim/PHD/Projects/BIANA/scripts/update_affinity_and_complementation_methods.py
+
+python ./scripts/generate_network_interactomix.py
+
+    ---> Create an interactome (protein-protein interaction network) associated to a species:
+    ---> Example: python /home/quim/PHD/Projects/BIANA/scripts/generate_network_interactomix.py -radius 0 -taxid 9606 -edge /home/quim/PHD/Projects/BIANA/outputs/BIANA_2020_geneID_seqtax_drugtarget/human_network_biana_2020.txt -node /home/quim/PHD/Projects/BIANA/outputs/BIANA_2020_geneID_seqtax_drugtarget/human_network_biana_2020_nodes.txt -trans /home/quim/PHD/Projects/BIANA/outputs/BIANA_2020_geneID_seqtax_drugtarget/human_network_biana_2020_translation.txt -ttype geneid -format multi-fields &> /home/quim/PHD/Projects/BIANA/outputs/BIANA_2020_geneID_seqtax_drugtarget/human_network_biana_2020.log
+    ---> CAUTION!!! This script may take a lot of time and memory! So lately, if I had to use it, I was using it from the cluster (hydra). I installed BIANA package in a virtual environment. BIANA database can be used from hydra because hydra is connected to the server of ben-yehuda.
+
+    ---> Create a subnetwork of proteins interacting to a list of proteins in a radius X.
+    ---> Example: python generate_network_interactomix.py -iseed example/sample1.txt -radius 1 -taxid 9606 -stype uniprotentry -ttype proteinsequence -trans example/output/example.proteinsequence.trans -strans example/output/example.seeds.trans -edge example/output/example.edges -node example/output/example.nodes -format raw -rY2H
+    ---> Example 2: python /sbi/users/interchange/quim/baldo/BIANA/scripts/generate_network_interactomix.py -iseed /sbi/users/interchange/quim/baldo/BIANA/data/TTR.txt -radius 1 -taxid 9606 -stype uniprotaccession -ttype uniprotaccession
+
+python ./scripts/get_fasta_from_list.py
+
+    ---> Get a FASTA file from a list of proteins
+    ---> Example: python /home/quim/PHD/Projects/BIANA/scripts/get_fasta_from_list.py -i /home/quim/PHD/Projects/BIANA/data/human.txt -t uniprotaccession -o /home/quim/PHD/Projects/BIANA/outputs/human.fasta -v
+
+python ./scripts/get_alias_from_list.py
+
+    ---> Get a specific type ID from a list of proteins that have another type of ID
+    ---> python /home/quim/PHD/Projects/BIANA/scripts/get_alias_from_list.py -i /home/quim/PHD/Projects/BIANA/data/yeast_symbols.txt -ii genesymbol -io sgd -o /home/quim/PHD/Projects/BIANA/outputs/yeast_sgd.fasta -v
+
+
