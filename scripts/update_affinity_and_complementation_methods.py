@@ -2,9 +2,6 @@ import ConfigParser
 import mysql.connector
 import sys, os, re
 
-from context import NetworkAnalysis
-import NetworkAnalysis.drug as NA_drug
-
 def main():
 
     #----------------------#
@@ -12,11 +9,11 @@ def main():
     #----------------------#
 
     # Get the program path
-    main_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-    classes_path = os.path.join(main_path, 'NetworkAnalysis')
+    scripts_path = os.path.abspath(os.path.dirname(__file__))
+    main_path = os.path.abspath(os.path.join(scripts_path, '..'))
 
     # Define the outputs
-    output_file = os.path.join(classes_path, 'methods_dictionaries.py')
+    output_file = os.path.join(scripts_path, 'methods_dictionaries.py')
 
 
     #--------------------------------------#
@@ -24,7 +21,7 @@ def main():
     #--------------------------------------#
 
     # Read the config file
-    config_file = os.path.join(main_path, 'config.ini')
+    config_file = os.path.join(scripts_path, 'config.ini')
     config = ConfigParser.ConfigParser()
     config.read(config_file)
 
@@ -45,7 +42,7 @@ def main():
     complementation = list(complementation_dict.values())
 
     # Define the query
-    key_attribute_table = NA_drug.return_key_attribute_table(cnx, ontology_name='psimiobo')
+    key_attribute_table = return_key_attribute_table(cnx, ontology_name='psimiobo')
     query = ("SELECT k.value, e.value FROM {} AS k JOIN externalEntitypsimi_name AS e ON e.externalEntityID = k.externalEntityID ".format(key_attribute_table))
 
     cursor.execute(query)
@@ -92,6 +89,25 @@ def main():
 
     return
 
+def return_key_attribute_table(cnx, ontology_name):
+    """
+    Returns the table that contains the Unification Protocol
+    introduced as query
+    """
+
+    query = (''' SELECT key_id FROM ExternalEntityOntology WHERE name = %s ''')
+
+    cursor = cnx.cursor()
+    cursor.execute(query, (ontology_name,))
+    key_ids = []
+    for items in cursor:
+        for key in items:
+            key_ids.append(key)
+    key_id = key_ids[0]
+    key_attribute_table = 'key_attribute_{}'.format(str(key_id))
+    cursor.close()
+
+    return key_attribute_table
 
 if  __name__ == "__main__":
 
